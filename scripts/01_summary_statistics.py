@@ -136,6 +136,7 @@ if __name__=='__main__':
     parser.add_argument('--extract_samples', default=None, help='Subset to sample IDs in file')
     parser.add_argument('--hapmap', default=None, help='Path to HapMap SNPs')
     parser.add_argument('--dbsnp', default=None, help='annotate with rsids from dbsnp')
+    parser.add_argument('--ancestry', default=None, help='select ancestry (eur)')
     parser.add_argument('--dataset', default=None, help='Either "imp" or "calls".')
     parser.add_argument('--response', default=None, help='Response variable')
     parser.add_argument('--covariates', default=None, help='list of covariates')
