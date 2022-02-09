@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-#$ -N magma
+#$ -N magma_meta
 #$ -wd /well/lindgren-ukbb/projects/ukbb-11867/flassen/projects/KO/ukb_targets
-#$ -o logs/magma.log
-#$ -e logs/magma.errors.log
+#$ -o logs/magma_meta.log
+#$ -e logs/magma_meta.errors.log
 #$ -P lindgren.prjc
 #$ -pe shmem 1
 #$ -q short.qc@@short.hga
@@ -12,11 +12,11 @@
 
 module load gcccuda/2020b
 
-readonly in_dir="data/sumstat/giant/exome"
-readonly out_dir="data/magma/WHRadjBMI_eur_add"
+readonly in_dir="data/sumstat/giant/meta"
+readonly out_dir="data/magma/meta_bmi"
 
-readonly sumstat="${in_dir}/PublicRelease.WHRadjBMI.C.Eur.Add.txt"
-readonly out_prefix="${out_dir}/WHRadjBMI_C_Eur_ADD"
+readonly sumstat="${in_dir}/Bmi.giant-ukbb.meta-analysis.combined.23May2018.HapMap2_only.txt"
+readonly out_prefix="${out_dir}/BMI_giant_meta_hm2"
 readonly snp_loc="${out_prefix}.snp_loc"
 
 readonly magma_dir="/well/lindgren/flassen/software/magma"
@@ -32,21 +32,34 @@ readonly magma="${magma_dir}/./magma"
 mkdir -p ${out_dir}
 
 # Format gene gene loc file
-cat ${sumstat} | awk '{print $1"\t"$2"\t"$3}' > ${snp_loc}
+if [ ! -f ${snp_loc} ]; then
+  cat ${sumstat} | awk '{print $3"\t"$1"\t"$2}' > ${snp_loc}
+else
+  >&2 echo "${snp_loc} already exists. Skipping.."
+fi
 
 # Annotation Step (SNP to gene mapping)
-${magma} \
-  --annotate \
-  --snp-loc "${snp_loc}" \
-  --gene-loc "${genes}" \
-  --out "${out_prefix}" 
+if [ ! -f "${out_prefix}.genes.annot" ]; then
+  set -x
+  ${magma} \
+    --annotate \
+    --snp-loc "${snp_loc}" \
+    --gene-loc "${genes}" \
+    --out "${out_prefix}" 
+  set +x
+else
+  >&2 echo "${out_prefix}.genes.annot already exist. Skipping.."
+fi
+
+ #--annotate "window=1,1" \
 
 # Gene Analysis Step (calculate gene p-values + other gene-level metrics)
 ${magma} \
-  --bfile "${prefix_ref}" \
-  --gene-annot "${out_prefix}.genes.annot" \
-  --pval "${sumstat}" "pval=9" "snp-id=1" "ncol=10" \
-  --out "${out_prefix}"
+    --bfile "${prefix_ref}" \
+    --gene-annot "${out_prefix}.genes.annot" \
+    --pval "${sumstat}" "pval=P" "snp-id=SNP" "N=806834" \
+    --out "${out_prefix}"
+
 
 # move magma log
 mv "magma.log" "${out_dir}/magma.log"
