@@ -12,13 +12,11 @@
 
 module load gcccuda/2020b
 
-readonly in_dir="data/sumstat/giant"
+readonly in_dir="data/sumstat/giant/exome"
 readonly out_dir="data/magma"
 
 readonly sumstat="${in_dir}/PublicRelease.WHRadjBMI.C.Eur.Add.txt"
 readonly out_prefix="${out_dir}/WHRadjBMI_C_Eur_ADD"
-#readonly annot_prefix="${out_dir}/WHRadjBMI_C_Eur_ADD_annot"
-#readonly gene_prefix="${out_dir}/WHRadjBMI_C_Eur_ADD_gene"
 readonly snp_loc="${out_prefix}.snp_loc"
 
 readonly magma_dir="/well/lindgren/flassen/software/magma"
@@ -39,29 +37,32 @@ if [ ! -f ${snp_loc} ]; then
 else
   >&2 echo "${snp_loc} already exists. Skipping.."
 fi
+
 # Annotation Step (SNP to gene mapping)
 if [ ! -f "${out_prefix}.genes.annot" ]; then
   set -x
   ${magma} \
     --annotate \
-    --snp-loc ${snp_loc} \
-    --gene-loc ${genes} \
-    --out ${out_prefix} 
+    --snp-loc "${snp_loc}" \
+    --gene-loc "${genes}" \
+    --out "${out_prefix}" 
   set +x
 else
   >&2 echo "${out_prefix}.genes.annot already exist. Skipping.."
 fi
 
+ #--annotate "window=1,1" \
 
 # Gene Analysis Step (calculate gene p-values + other gene-level metrics)
 ${magma} \
-    --bfile ${prefix_ref} \
+    --bfile "${prefix_ref}" \
     --gene-annot "${out_prefix}.genes.annot" \
-    --pval "${sumstat}" 'pval=9' 'snp-id=1' 'ncol=10' \
-    --out ${out_prefix} 
- 
-#snp-id=snpname "pval=pvalue" "ncol=n" \
- #snp-id="snoname" pval="pvalue"
+    --pval "${sumstat}" "pval=9" "snp-id=1" "ncol=10" \
+    --out "${out_prefix}"
 
+
+
+# move magma log
+mv "magma.log" "${out_dir}/magma.log"
 
 
