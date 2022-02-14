@@ -25,6 +25,8 @@ readonly genes="${magma_dir}/auxiliary_files/genes/GRCh37/NCBI37.gene.loc"
 readonly dbsnp="${magma_dir}/auxiliary_files/dbsnp/dbsnp151.synonyms"
 readonly magma="${magma_dir}/./magma"
 
+readonly rscript=
+
 # * Note: Only SNPs in reference panel and target are used for analysis and
 # we should therefore generate a new panel using all imputed SNPs with info > 0.8
 # * Note: MAGMA can not read in gzipped data
@@ -50,5 +52,12 @@ ${magma} \
 
 # move magma log
 mv "magma.log" "${out_dir}/magma.log"
+
+# clean up files
+conda activate rpy
+Rscript ${rscript} \
+  --in_path "${out_prefix}.genes.out" \
+  --out_path "${out_prefix}.txt" \
+  --out_sep "\n"
 
 
