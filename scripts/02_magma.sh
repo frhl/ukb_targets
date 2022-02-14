@@ -54,7 +54,7 @@ ${magma} \
 mv "magma.log" "${out_dir}/magma.log"
 
 # clean up files
-conda activate rpy
+set_up_rpy
 Rscript ${rscript} \
   --in_path "${out_prefix}.genes.out" \
   --out_path "${out_prefix}.txt" \
