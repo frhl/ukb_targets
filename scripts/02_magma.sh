@@ -12,6 +12,8 @@
 
 module load gcccuda/2020b
 
+source utils/bash_utils.sh
+
 readonly in_dir="data/sumstat/giant/exome"
 readonly out_dir="data/magma/WHRadjBMI_eur_add"
 
